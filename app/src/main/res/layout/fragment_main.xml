@@ -14,6 +14,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/thumbView"
+        android:horizontalSpacing="0dp"
+        android:verticalSpacing="0dp"
+        android:columnWidth="300px"
         android:layout_alignParentTop="true"
         android:numColumns="auto_fit"/>
 </RelativeLayout>

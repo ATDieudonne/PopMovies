@@ -29,37 +29,40 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * A placeholder fragment containing a simple aview.
+ * A placeholder fragment containing a simple view.
  */
 public class MovieDBFragment extends Fragment {
 
     //Create an arrayList adatper to hold movie data
     public ImageAdapter mMovieListAdapter;
+    GridView my_listview_movieList;
 
-    //Create a String array to hold the movie URLs
-    public String[] popMovieList = {"http://image.tmdb.org/t/p/w185//txb15FdILLI2KZolbkxefbWmVvs.jpg",
-                                    "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
-                                    "http://image.tmdb.org/t/p/w185//txb15FdILLI2KZolbkxefbWmVvs.jpg",
-                                    "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"};
-
+    public String[] popMovieList;
     public MovieDBFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+
+
+
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         //Now to bind the adapter to the grid view. But first we'll need to create an reference to the grid view as we only created
         //it in the fragment xml file
 
-        GridView my_listview_movieList = (GridView) rootView.findViewById(R.id.thumbView);
+        my_listview_movieList = (GridView) rootView.findViewById(R.id.thumbView);
 
+        /* This block moved to Post execute to pick up tmbd image links
         //Initialize the adapter
         mMovieListAdapter = new ImageAdapter(getContext(),popMovieList);
 
         //then use the setAdapter method to bind the grid view to the adapter
         my_listview_movieList.setAdapter(mMovieListAdapter);
+        */
+
+        updatePopMovieList();
 
         return rootView;
     }
@@ -77,16 +80,17 @@ public class MovieDBFragment extends Fragment {
         // getString function of the Shared preferences. Since that function requires 2 strings
         //you have the use the general getString function to get the strings from the resource ID
         movieListTask.execute();
+
     }
 
     //Override onStart method to update the movie data
-   /*
+
     @Override
     public void onStart(){
+
+       // updatePopMovieList();
         super.onStart();
-        //updatePopMovieList();
     }
-    */
 
     public class ImageAdapter extends BaseAdapter
     {
@@ -152,7 +156,7 @@ public class MovieDBFragment extends Fragment {
             final String TMDB_ID = "id";
             final String TMDB_TITLE = "title";
             final String TMDB_POSTER_PATH = "poster_path";
-            //final String TMDB_OVERVIEW = "overview";
+            final String TMDB_BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w300/";
 
 
             //create a JSON object from the repsonse recieved by TMDB
@@ -162,10 +166,11 @@ public class MovieDBFragment extends Fragment {
 
             String[] resultStrs = new String[20];
             for(int i = 0; i < movieArray.length(); i++) {
-                // For now, using the format "Day, description, hi/low"
+                // declare strings that you will map to the section headers of the JSON response
                 String movieTitle;
                 String moviePosterPath;
                 String movieId;
+
 
                 // Get the JSON Object representing the movie
                 JSONObject popularMovie = movieArray.getJSONObject(i);
@@ -175,7 +180,9 @@ public class MovieDBFragment extends Fragment {
                 movieTitle = popularMovie.getString(TMDB_TITLE);
                 moviePosterPath = popularMovie.getString(TMDB_POSTER_PATH);
 
-                resultStrs[i] = movieId;
+
+
+                resultStrs[i] = TMDB_BASE_IMAGE_URL + moviePosterPath;
             }
 
             //For log verification to be removed in final product.
@@ -204,14 +211,13 @@ public class MovieDBFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-
             try {
                 //The following strings will be used to build the URL
                 final String TMDB_BASE_URL = "http://api.themoviedb.org/3/";
                 final String QUERY_PARAM = "movie";
                 final String FORMAT_PARAM = "top_rated";
                 final String APPID_PARAM = "api_key";
-                //final String TMDB_BASE_IMAGE_URL;
+
 
                 //Time to build the URL
                 //Declare a Uri object and run the parse command
@@ -289,9 +295,14 @@ public class MovieDBFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] strings) {
 
-            //System.arraycopy(strings, 0,popMovieList,0,strings.length);
-            //mMovieListAdapter.clear();
-            //mMovieListAdapter.addAll(strings);
+            popMovieList = new String[strings.length];
+            System.arraycopy(strings, 0,popMovieList,0,strings.length);
+
+            //Initialize the adapter
+            mMovieListAdapter = new ImageAdapter(getContext(),popMovieList);
+
+            //then use the setAdapter method to bind the grid view to the adapter
+            my_listview_movieList.setAdapter(mMovieListAdapter);
 
             super.onPostExecute(strings);
         }
