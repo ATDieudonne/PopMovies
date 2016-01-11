@@ -1,5 +1,6 @@
 package com.example.android.popmovies;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -10,8 +11,11 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
 import android.widget.GridView;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -23,16 +27,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
- * A placeholder fragment containing a simple view.
+ * A placeholder fragment containing a simple aview.
  */
 public class MovieDBFragment extends Fragment {
 
     //Create an arrayList adatper to hold movie data
-    public ArrayAdapter<String> mMovieListAdapter;
+    public ImageAdapter mMovieListAdapter;
+
+    //Create a String array to hold the movie URLs
+    public String[] popMovieList = {"http://image.tmdb.org/t/p/w185//txb15FdILLI2KZolbkxefbWmVvs.jpg",
+                                    "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg",
+                                    "http://image.tmdb.org/t/p/w185//txb15FdILLI2KZolbkxefbWmVvs.jpg",
+                                    "http://image.tmdb.org/t/p/w185//nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg"};
 
     public MovieDBFragment() {
     }
@@ -42,26 +50,15 @@ public class MovieDBFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
-        //Create a list that will populate the GridView
-        List thumbnails = new ArrayList<String> ();
-
-        //declare new array adapter
-        mMovieListAdapter = new ArrayAdapter<String>
-                (
-                        //getContext will return the current context (the parent items activity)
-                        getContext(),
-                        //this will provide the name of the list item layout
-                        R.layout.thumbnail_view,
-                        R.id.list_item_movie_textview,
-                        //Finally we include the ArrayList that contains the data we want to populate the listviews with
-                        thumbnails);
-
-        //Now to bind the adapter to the list view. But first we'll need to create an reference to the list view as we only created
+        //Now to bind the adapter to the grid view. But first we'll need to create an reference to the grid view as we only created
         //it in the fragment xml file
 
         GridView my_listview_movieList = (GridView) rootView.findViewById(R.id.thumbView);
 
-        //then use the setAdapter method to bind the listview to the adapter
+        //Initialize the adapter
+        mMovieListAdapter = new ImageAdapter(getContext(),popMovieList);
+
+        //then use the setAdapter method to bind the grid view to the adapter
         my_listview_movieList.setAdapter(mMovieListAdapter);
 
         return rootView;
@@ -82,11 +79,56 @@ public class MovieDBFragment extends Fragment {
         movieListTask.execute();
     }
 
-    //Override onStart method to update the weather data
+    //Override onStart method to update the movie data
+   /*
     @Override
     public void onStart(){
         super.onStart();
-        updatePopMovieList();
+        //updatePopMovieList();
+    }
+    */
+
+    public class ImageAdapter extends BaseAdapter
+    {
+        private Context context;
+        private String[] movieList;
+
+        public ImageAdapter(Context c, String[] list)
+        {
+            super();
+            this.context = c;
+            this.movieList = list;
+
+        }
+
+        //---returns the number of images---
+        public int getCount() {
+            return movieList.length;
+        }
+
+        //---returns the ID of an item---
+
+        public Object getItem(int position) {
+            return movieList[position];
+        }
+
+        public long getItemId(int position) {
+            return position;
+        }
+
+        //---returns an ImageView view---
+        public View getView(int position, View convertView, ViewGroup parent)
+        {
+            ImageView imageView;
+            if (convertView == null) {
+                imageView = new ImageView(context);
+                convertView = imageView;
+            } else {
+                imageView = (ImageView) convertView;
+            }
+            Picasso.with(context).load(movieList[position]).into(imageView);
+            return convertView;
+        }
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
@@ -133,7 +175,7 @@ public class MovieDBFragment extends Fragment {
                 movieTitle = popularMovie.getString(TMDB_TITLE);
                 moviePosterPath = popularMovie.getString(TMDB_POSTER_PATH);
 
-                resultStrs[i] = movieId + "_" + movieTitle + "_" + moviePosterPath;
+                resultStrs[i] = movieId;
             }
 
             //For log verification to be removed in final product.
@@ -169,6 +211,7 @@ public class MovieDBFragment extends Fragment {
                 final String QUERY_PARAM = "movie";
                 final String FORMAT_PARAM = "top_rated";
                 final String APPID_PARAM = "api_key";
+                //final String TMDB_BASE_IMAGE_URL;
 
                 //Time to build the URL
                 //Declare a Uri object and run the parse command
@@ -245,8 +288,11 @@ public class MovieDBFragment extends Fragment {
 
         @Override
         protected void onPostExecute(String[] strings) {
-            mMovieListAdapter.clear();
-            mMovieListAdapter.addAll(strings);
+
+            //System.arraycopy(strings, 0,popMovieList,0,strings.length);
+            //mMovieListAdapter.clear();
+            //mMovieListAdapter.addAll(strings);
+
             super.onPostExecute(strings);
         }
     }
