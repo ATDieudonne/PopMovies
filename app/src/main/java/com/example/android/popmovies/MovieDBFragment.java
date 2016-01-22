@@ -1,6 +1,7 @@
 package com.example.android.popmovies;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -47,7 +49,7 @@ public class MovieDBFragment extends Fragment {
 
 
 
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
         //Now to bind the adapter to the grid view. But first we'll need to create an reference to the grid view as we only created
         //it in the fragment xml file
@@ -62,7 +64,24 @@ public class MovieDBFragment extends Fragment {
         my_listview_movieList.setAdapter(mMovieListAdapter);
         */
 
-        updatePopMovieList();
+
+        //Create listener for clicked listview item
+        my_listview_movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                //Create intent to open DetailActivity
+                Intent detailsIntent = new Intent(getActivity(),DetailActivity.class);
+
+                //Pass movie data from clicked view by passing the image url in the array of the
+                //mMovieListAdapter in the position passed into the listener as extra text
+                detailsIntent.putExtra(detailsIntent.EXTRA_TEXT,mMovieListAdapter.movieList[position]);
+
+                //Start activity using intent
+                startActivity(detailsIntent);
+            }
+        });
+
 
         return rootView;
     }
@@ -88,7 +107,7 @@ public class MovieDBFragment extends Fragment {
     @Override
     public void onStart(){
 
-       // updatePopMovieList();
+       updatePopMovieList();
         super.onStart();
     }
 

@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
 import android.view.LayoutInflater;
@@ -97,14 +96,14 @@ public class DetailActivity extends AppCompatActivity {
             //Declare intent variable to copy passed Intent reference into
             Intent passedIntent = getActivity().getIntent();
             //Now create a String to put the passed forecast data into
-            String passedForecastData = passedIntent.getStringExtra(passedIntent.EXTRA_TEXT);
+            String passedMovieData = passedIntent.getStringExtra(passedIntent.EXTRA_TEXT);
             //Log.v("DetailActivity",passedForcastData);
-            TextView forecastTextView = new TextView(getContext());
-            forecastTextView.setTextSize(16);
-            forecastTextView.setText(passedForecastData);
-            container.addView(forecastTextView);
+            TextView imageTextView = new TextView(getContext());
+            imageTextView.setTextSize(16);
+            imageTextView.setText(passedMovieData);
+            container.addView(imageTextView);
 
-            mForecastStr = passedForecastData;
+            mForecastStr = passedMovieData;
 
             return rootView;
         }
