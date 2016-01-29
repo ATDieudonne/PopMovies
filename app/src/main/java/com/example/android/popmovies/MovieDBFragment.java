@@ -159,7 +159,8 @@ public class MovieDBFragment extends Fragment {
         //create string to be used as tag for application
         public final String LOG_TAG = FetchMovieTask.class.getSimpleName();
         //Going to insert networking code snippet from Udacity's GitHub repo
-
+        SharedPreferences sortOrder = PreferenceManager.getDefaultSharedPreferences(getContext());
+        String sort_order = sortOrder.getString(getString(R.string.pref_sort_order_key), getString(R.string.pref_sort_order_default));
         /**
          * Take the String representing the complete forecast in JSON Format and
          * pull out the data we need to construct the Strings needed for the wireframes.
@@ -234,7 +235,7 @@ public class MovieDBFragment extends Fragment {
                 //The following strings will be used to build the URL
                 final String TMDB_BASE_URL = "http://api.themoviedb.org/3/";
                 final String QUERY_PARAM = "movie";
-                final String FORMAT_PARAM = "top_rated";
+                final String FORMAT_PARAM = sort_order;
                 final String APPID_PARAM = "api_key";
 
 
@@ -326,4 +327,13 @@ public class MovieDBFragment extends Fragment {
             super.onPostExecute(strings);
         }
     }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);  // if there is options menu,
+    }
+
+
+
 }
