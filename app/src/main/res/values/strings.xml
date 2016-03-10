@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">PopMovies</string>
     <string name="action_settings">Settings</string>
-    <string name="tmdb_app_id" translatable="false">f8c49eca5e434603a6797ca493a22d76</string>
+    <string name="tmdb_app_id" translatable="false">PLACEHOLDER</string>
 
     <!-- Copied from sunshine -->
     <string name="title_activity_detail">DetailActivity</string>

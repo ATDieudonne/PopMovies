@@ -10,4 +10,49 @@ android:paddingTop="@dimen/activity_vertical_margin"
 tools:context="com.example.android.popmovies.app.DetailActivity">
 
 
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/detailPoster"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Large Text"
+        android:id="@+id/detailTitle"
+        android:layout_toRightOf="@+id/detailPoster"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="17dp"
+        android:layout_marginEnd="17dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Medium Text"
+        android:id="@+id/detailReleaseDate"
+        android:layout_below="@+id/detailTitle"
+        android:layout_alignLeft="@+id/detailTitle"
+        android:layout_alignStart="@+id/detailTitle" />
+
+    <RatingBar
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/detailRatingBar"
+        android:layout_below="@+id/detailReleaseDate"
+        android:layout_alignLeft="@+id/detailReleaseDate" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="Small Text"
+        android:id="@+id/detailSynopsis"
+        android:layout_below="@+id/detailPoster"
+        android:layout_centerHorizontal="true" />
+
 </RelativeLayout>

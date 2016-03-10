@@ -1,17 +1,23 @@
 package com.example.android.popmovies;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.ShareActionProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 /**
  * Created by ADieu on 1/11/2016.
@@ -62,8 +68,7 @@ public class DetailActivity extends AppCompatActivity {
      */
     public static class PlaceholderFragment extends Fragment {
 
-        private static final String FORECAST_SHARE_HASHTAG = " #SunshineApp";
-        private String mForecastStr;
+        private static final String FORECAST_SHARE_HASHTAG = " #PopMovieApp";
 
         private ShareActionProvider mShareActionProvider;
 
@@ -96,15 +101,32 @@ public class DetailActivity extends AppCompatActivity {
             //Declare intent variable to copy passed Intent reference into
             Intent passedIntent = getActivity().getIntent();
             //Now create a String to put the passed forecast data into
-            String passedMovieData = passedIntent.getStringExtra(passedIntent.EXTRA_TEXT);
-            //Log.v("DetailActivity",passedForcastData);
+            //String passedMovieData = passedIntent.getStringExtra(passedIntent.EXTRA_TEXT);
+            Bundle passedMovieDataBundle = passedIntent.getBundleExtra("movieDataBundle");
+            String passedMovieTitle = passedMovieDataBundle.getString("title");
+            String passedMovieSynopsis = passedMovieDataBundle.getString("synopsis");
+            String passedMovieReleaseDate = passedMovieDataBundle.getString("releaseDate");
+            Float passedMovieRating = Float.parseFloat(passedMovieDataBundle.getString("rating"));
+            String passedMovieImgURL = passedMovieDataBundle.getString("imgURL");
+            Log.v("DetailActivity", "title: "+passedMovieTitle+ " synopsis:" + passedMovieSynopsis);
+            /*
             TextView imageTextView = new TextView(getContext());
             imageTextView.setTextSize(16);
-            imageTextView.setText(passedMovieData);
+            imageTextView.setText("title: "+passedMovieTitle+ " synopsis:" + passedMovieSynopsis);
             container.addView(imageTextView);
+            */
+            //Populate detail fragment sections with passed data
+            TextView titleTextView = (TextView) rootView.findViewById(R.id.detailTitle);
+            titleTextView.setText(passedMovieTitle);
+            TextView synopsisTextView = (TextView) rootView.findViewById(R.id.detailSynopsis);
+            synopsisTextView.setText(passedMovieSynopsis);
+            TextView rDateTextView = (TextView) rootView.findViewById(R.id.detailReleaseDate);
+            rDateTextView.setText(passedMovieReleaseDate);
+            RatingBar ratingRBar = (RatingBar) rootView.findViewById(R.id.detailRatingBar);
+            ratingRBar.setRating(passedMovieRating);
 
-            mForecastStr = passedMovieData;
-
+            Context context = getContext();
+            Picasso.with(context).load(passedMovieImgURL).into( (ImageView)rootView.findViewById(R.id.detailPoster));
             return rootView;
         }
 
@@ -113,7 +135,7 @@ public class DetailActivity extends AppCompatActivity {
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_WHEN_TASK_RESET);
             shareIntent.setType("text/plain");
-            shareIntent.putExtra(Intent.EXTRA_TEXT, mForecastStr + FORECAST_SHARE_HASHTAG);
+            shareIntent.putExtra(Intent.EXTRA_TEXT, FORECAST_SHARE_HASHTAG);
             return shareIntent;
         }
 

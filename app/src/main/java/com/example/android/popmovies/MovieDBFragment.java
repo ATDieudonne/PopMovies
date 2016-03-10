@@ -35,11 +35,13 @@ import java.net.URL;
  */
 public class MovieDBFragment extends Fragment {
 
-    //Create an arrayList adatper to hold movie data
+    //Create an arrayList adapter to hold movie data
     public ImageAdapter mMovieListAdapter;
-    GridView my_listview_movieList;
-
-    public String[] popMovieList;
+    GridView my_gridView_movieList;
+    public String[] popMovieSynopsis = new String[20];
+    public String[] popMovieTitle = new String[20];
+    public String[] popMovieRating = new String[20];
+    public String[] popMovieReleaseDate = new String[20];
     public MovieDBFragment() {
     }
 
@@ -50,32 +52,26 @@ public class MovieDBFragment extends Fragment {
 
 
         final View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        Context curContext = getContext();
 
-        //Now to bind the adapter to the grid view. But first we'll need to create an reference to the grid view as we only created
-        //it in the fragment xml file
-
-        my_listview_movieList = (GridView) rootView.findViewById(R.id.thumbView);
-
-        /* This block moved to Post execute to pick up tmbd image links
-        //Initialize the adapter
-        mMovieListAdapter = new ImageAdapter(getContext(),popMovieList);
-
-        //then use the setAdapter method to bind the grid view to the adapter
-        my_listview_movieList.setAdapter(mMovieListAdapter);
-        */
+        my_gridView_movieList = (GridView) rootView.findViewById(R.id.thumbView);
 
 
-        //Create listener for clicked listview item
-        my_listview_movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        //Create listener for clicked gridview item
+        my_gridView_movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
                 //Create intent to open DetailActivity
-                Intent detailsIntent = new Intent(getActivity(),DetailActivity.class);
-
-                //Pass movie data from clicked view by passing the image url in the array of the
-                //mMovieListAdapter in the position passed into the listener as extra text
-                detailsIntent.putExtra(detailsIntent.EXTRA_TEXT,mMovieListAdapter.movieList[position]);
+                Intent detailsIntent = new Intent(getActivity(), DetailActivity.class);
+                //Create and populate bundle with info required for detail activity
+                Bundle movieDataBundle = new Bundle();
+                movieDataBundle.putString("title", popMovieTitle[position]);
+                movieDataBundle.putString("synopsis", popMovieSynopsis[position]);
+                movieDataBundle.putString("releaseDate", popMovieReleaseDate[position]);
+                movieDataBundle.putString("rating", popMovieRating[position]);
+                movieDataBundle.putString("imgURL", mMovieListAdapter.movieList[position]);
+                detailsIntent.putExtra("movieDataBundle", movieDataBundle);
 
                 //Start activity using intent
                 startActivity(detailsIntent);
@@ -83,22 +79,22 @@ public class MovieDBFragment extends Fragment {
         });
 
 
+
+        Log.v("onCreateView", "View Created");
         return rootView;
     }
 
     //create method to perform update tasks
     private void updatePopMovieList(){
-        FetchMovieTask movieListTask= new FetchMovieTask();
-        //To use the zip saved in the preferences you need to access the
-        //shared preferences that handles all preferences in a project.
-        //Create a SharedPreference object that you will initialise to teh default Shared
-        //Preferences file.
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-
-        //Create a string that will hold the string value that you can find using the
-        // getString function of the Shared preferences. Since that function requires 2 strings
-        //you have the use the general getString function to get the strings from the resource ID
-        movieListTask.execute();
+        Log.v("updatePopMovieList", "Update function started");
+            FetchMovieTask movieListTask= new FetchMovieTask(getContext(),getView());
+            //To use the sort type saved in the preferences you need to access the
+            //shared preferences that handles all preferences in a project.
+            //Create a SharedPreference object that you will initialise to teh default Shared
+            //Preferences file.
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+            movieListTask.execute();
+        Log.v("updatePopMovieList", "Update function completed");
 
     }
 
@@ -106,9 +102,9 @@ public class MovieDBFragment extends Fragment {
 
     @Override
     public void onStart(){
-
+       Log.v("onStart", "Fragment function started");
        updatePopMovieList();
-        super.onStart();
+       super.onStart();
     }
 
     public class ImageAdapter extends BaseAdapter
@@ -150,14 +146,29 @@ public class MovieDBFragment extends Fragment {
                 imageView = (ImageView) convertView;
             }
             Picasso.with(context).load(movieList[position]).into(imageView);
+
             return convertView;
         }
+
+        public void updateMovieList(String[] newList){
+            this.movieList = newList;
+            this.notifyDataSetChanged();
+        }
+
     }
 
     public class FetchMovieTask extends AsyncTask<String, Void, String[]> {
 
         //create string to be used as tag for application
         public final String LOG_TAG = FetchMovieTask.class.getSimpleName();
+        private Context passedContext;
+        private View passedRootView;
+
+        //create a constructor to take in passed Context and View
+        public FetchMovieTask(Context context, View rView){
+            this.passedContext = context;
+            this.passedRootView = rView;
+        }
         //Going to insert networking code snippet from Udacity's GitHub repo
         SharedPreferences sortOrder = PreferenceManager.getDefaultSharedPreferences(getContext());
         String sort_order = sortOrder.getString(getString(R.string.pref_sort_order_key), getString(R.string.pref_sort_order_default));
@@ -175,11 +186,14 @@ public class MovieDBFragment extends Fragment {
             final String TMDB_RESULTS = "results";
             final String TMDB_ID = "id";
             final String TMDB_TITLE = "title";
+            final String TMDB_SYNOPSIS = "overview";
+            final String TMDB_RATING = "vote_average";
+            final String TMDB_RELEASE_DT = "release_date";
             final String TMDB_POSTER_PATH = "poster_path";
-            final String TMDB_BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w300/";
+            final String TMDB_BASE_IMAGE_URL = "http://image.tmdb.org/t/p/w500/";
 
 
-            //create a JSON object from the repsonse recieved by TMDB
+            //create a JSON object from the response received by TMDB
             //then create an array to hold the results
             JSONObject movieJson = new JSONObject(movieJsonStr);
             JSONArray movieArray = movieJson.getJSONArray(TMDB_RESULTS);
@@ -190,6 +204,9 @@ public class MovieDBFragment extends Fragment {
                 String movieTitle;
                 String moviePosterPath;
                 String movieId;
+                String movieSynopsis;
+                String movieRating;
+                String movieReleaseDate;
 
 
                 // Get the JSON Object representing the movie
@@ -198,10 +215,16 @@ public class MovieDBFragment extends Fragment {
                 //Assign values stripped from JSON
                 movieId = popularMovie.getString(TMDB_ID);
                 movieTitle = popularMovie.getString(TMDB_TITLE);
+                movieSynopsis = popularMovie.getString(TMDB_SYNOPSIS);
+                movieRating = popularMovie.getString(TMDB_RATING);
+                movieReleaseDate = popularMovie.getString(TMDB_RELEASE_DT);
                 moviePosterPath = popularMovie.getString(TMDB_POSTER_PATH);
 
 
-
+                popMovieTitle[i] = movieTitle;
+                popMovieRating[i] = movieRating;
+                popMovieReleaseDate[i] = movieReleaseDate;
+                popMovieSynopsis[i] = movieSynopsis;
                 resultStrs[i] = TMDB_BASE_IMAGE_URL + moviePosterPath;
             }
 
@@ -280,7 +303,7 @@ public class MovieDBFragment extends Fragment {
                 }
                 movieListJsonStr = buffer.toString();
 
-                Log.v(LOG_TAG, "Forecast JSON String: " + movieListJsonStr);
+                Log.v(LOG_TAG, "Movie Data JSON String: " + movieListJsonStr);
 
 
 
@@ -302,12 +325,15 @@ public class MovieDBFragment extends Fragment {
                 }
             }
             //End of Udacity Code
+
             try {
+                Log.v("doInBackground","Returning movieListJsonStr");
                 return getMovieDataFromJson(movieListJsonStr);
             } catch(JSONException e){
                 Log.e(LOG_TAG,e.getMessage(),e);
                 e.printStackTrace();
             }
+            Log.v("doInBackground","Returning movieList:" + movieListJsonStr );
             String[] movieList = {movieListJsonStr};
             return movieList;
         }
@@ -315,16 +341,16 @@ public class MovieDBFragment extends Fragment {
         @Override
         protected void onPostExecute(String[] strings) {
 
-            popMovieList = new String[strings.length];
-            System.arraycopy(strings, 0,popMovieList,0,strings.length);
-
-            //Initialize the adapter
-            mMovieListAdapter = new ImageAdapter(getContext(),popMovieList);
-
-            //then use the setAdapter method to bind the grid view to the adapter
-            my_listview_movieList.setAdapter(mMovieListAdapter);
-
+            if(mMovieListAdapter == null){
+                mMovieListAdapter = new ImageAdapter(passedContext,strings);
+                mMovieListAdapter.notifyDataSetChanged();
+            }else {
+                mMovieListAdapter.updateMovieList(strings);
+            }
+            my_gridView_movieList.setAdapter(mMovieListAdapter);
+            Log.v("onPostExecute", "ImageAdapter Update Complete");
             super.onPostExecute(strings);
+
         }
     }
 
