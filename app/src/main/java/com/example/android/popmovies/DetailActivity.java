@@ -109,12 +109,7 @@ public class DetailActivity extends AppCompatActivity {
             Float passedMovieRating = Float.parseFloat(passedMovieDataBundle.getString("rating"));
             String passedMovieImgURL = passedMovieDataBundle.getString("imgURL");
             Log.v("DetailActivity", "title: "+passedMovieTitle+ " synopsis:" + passedMovieSynopsis);
-            /*
-            TextView imageTextView = new TextView(getContext());
-            imageTextView.setTextSize(16);
-            imageTextView.setText("title: "+passedMovieTitle+ " synopsis:" + passedMovieSynopsis);
-            container.addView(imageTextView);
-            */
+
             //Populate detail fragment sections with passed data
             TextView titleTextView = (TextView) rootView.findViewById(R.id.detailTitle);
             titleTextView.setText(passedMovieTitle);
@@ -123,6 +118,9 @@ public class DetailActivity extends AppCompatActivity {
             TextView rDateTextView = (TextView) rootView.findViewById(R.id.detailReleaseDate);
             rDateTextView.setText(passedMovieReleaseDate);
             RatingBar ratingRBar = (RatingBar) rootView.findViewById(R.id.detailRatingBar);
+            ratingRBar.setIsIndicator(true);
+            Log.v("Rating:",String.valueOf(passedMovieRating));
+            ratingRBar.setNumStars(10);
             ratingRBar.setRating(passedMovieRating);
 
             Context context = getContext();
